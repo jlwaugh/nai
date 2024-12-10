@@ -1,6 +1,6 @@
 # Multiversity
 
-This is an example app built on the [NEAR AI Hub Demo](https://github.com/nearai/nearai/tree/main/hub/demo) for generative learning purposes.
+This is an example app built using the [NEAR AI Hub Demo](https://github.com/nearai/nearai/tree/main/hub/demo) for generative learning purposes.
 
 ### Nonce management
 
