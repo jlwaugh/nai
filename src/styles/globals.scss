@@ -1,0 +1,7 @@
+#near-wallet-selector-modal {
+  --wallet-selector-backdrop-bg: var(--black-a10);
+
+  .open {
+    z-index: 10000;
+  }
+}
