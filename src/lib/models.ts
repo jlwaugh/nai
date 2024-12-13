@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { parseStringOrNumber } from '~/utils/number';
-
 export const authorizationModel = z.object({
   account_id: z.string(),
   public_key: z.string(),
@@ -21,31 +19,6 @@ export const chatWithAgentModel = z.object({
   agent_env_vars: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
-export const listModelsModel = z.object({
-  provider: z.string(),
-});
-
-export const modelModel = z.object({
-  id: z.string(),
-  created: z.number(),
-  object: z.string(),
-  owned_by: z.string(),
-  number_of_inference_nodes: z.number().nullable().optional(),
-  supports_chat: z.boolean(),
-  supports_image_input: z.boolean(),
-  supports_tools: z.boolean(),
-  context_length: z.number().nullable().optional(),
-});
-
-export const modelsModel = z.object({
-  data: z.array(modelModel),
-  object: z.string(),
-});
-
-export const challengeModel = z.object({
-  challenge: z.string(),
-});
-
 export const nonceModel = z.object({
   nonce: z.string(),
   account_id: z.string(),
@@ -62,12 +35,6 @@ export const revokeNonceModel = z.object({
   nonce: z.string().regex(/^\d{32}$/),
   auth: z.string(),
 });
-
-export const entryCategory = z.enum([
-  'agent',
-  'environment',
-]);
-export type EntryCategory = z.infer<typeof entryCategory>;
 
 export const optionalVersion = z.preprocess(
   (value) => (!value || value === 'latest' || value === '*' ? '' : value),
@@ -111,7 +78,7 @@ export const entryDetailsModel = z.intersection(
 
 export const entryModel = z.object({
   id: z.number(),
-  category: entryCategory,
+  category: z.literal('agent'),
   namespace: z.string(),
   name: z.string(),
   version: z.string(),

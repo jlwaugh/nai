@@ -1,53 +1,6 @@
-import {
-  Lightbulb,
-  TerminalWindow,
-} from '@phosphor-icons/react';
-import { type ReactElement } from 'react';
 import { type z } from 'zod';
 
-import { type EntryCategory, type entryModel, optionalVersion } from './models';
-
-export const ENTRY_CATEGORY_LABELS: Record<
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  EntryCategory | (string & {}),
-  {
-    icon: ReactElement;
-    label: string;
-  }
-> = {
-  agent: {
-    icon: <Lightbulb />,
-    label: 'Agent',
-  },
-  environment: {
-    icon: <TerminalWindow />,
-    label: 'Environment',
-  }
-};
-
-export function primaryUrlForEntry(entry: z.infer<typeof entryModel>) {
-  let url: string | undefined;
-
-  switch (entry.category as EntryCategory) {
-    case 'agent':
-      url = `https://app.near.ai/agents/${entry.namespace}/${entry.name}/latest`;
-      break;
-  }
-
-  return url;
-}
-
-export function sourceUrlForEntry(entry: z.infer<typeof entryModel>) {
-  let url: string | undefined;
-
-  switch (entry.category as EntryCategory) {
-    case 'agent':
-      url = `${primaryUrlForEntry(entry)}/source`;
-      break;
-  }
-
-  return url;
-}
+import { type entryModel, optionalVersion } from './models';
 
 export function idForEntry(entry: z.infer<typeof entryModel>) {
   return `${entry.namespace}/${entry.name}/${entry.version}`;

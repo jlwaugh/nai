@@ -213,7 +213,10 @@ export const ThreadsSidebar = ({
                             Copy Thread Link
                           </Dropdown.Item>
 
-                          <Dropdown.Item href={thread.agent.url}>
+                          <Dropdown.Item
+                            href={thread.agent.url}
+                            external
+                          >
                             {env.NEXT_PUBLIC_CONSUMER_MODE ? (
                               <>
                                 <SvgIcon icon={<Plus />} />

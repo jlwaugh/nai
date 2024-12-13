@@ -3,22 +3,17 @@
 import {
   BreakpointDisplay,
   Button,
-  Card,
-  CardList,
   Flex,
   Form,
   InputTextarea,
   PlaceholderSection,
   PlaceholderStack,
-  Slider,
   Text,
   Tooltip,
 } from '@near-pagoda/ui';
 import {
   ArrowRight,
-  CodeBlock,
   Eye,
-  Folder,
   Info,
   List,
 } from '@phosphor-icons/react';
@@ -31,28 +26,24 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Controller, type SubmitHandler, useForm } from 'react-hook-form';
+import { type SubmitHandler, useForm } from 'react-hook-form';
 import { type z } from 'zod';
 
 import { AgentPermissionsModal } from '~/components/AgentPermissionsModal';
 import { AgentWelcome } from '~/components/AgentWelcome';
-import { EnvironmentVariables } from '~/components/EnvironmentVariables';
 import { IframeWithBlob } from '~/components/lib/IframeWithBlob';
 import { Sidebar } from '~/components/lib/Sidebar';
 import { Messages } from '~/components/Messages';
 import { SignInPrompt } from '~/components/SignInPrompt';
 import { ThreadsSidebar } from '~/components/ThreadsSidebar';
-import { env } from '~/env';
 import { useAgentRequestsWithIframe } from '~/hooks/agent-iframe-requests';
-import { useCurrentEntry, useEnvironmentVariables } from '~/hooks/entries';
+import { useCurrentEntry } from '~/hooks/entries';
 import { useQueryParams } from '~/hooks/url';
-import { sourceUrlForEntry } from '~/lib/entries';
 import { type chatWithAgentModel, type threadMessageModel } from '~/lib/models';
 import { useAuthStore } from '~/stores/auth';
 import { useThreadsStore } from '~/stores/threads';
 import { api } from '~/trpc/react';
 import { handleClientError } from '~/utils/error';
-import { formatBytes } from '~/utils/number';
 
 import { ThreadFileModal } from './ThreadFileModal';
 
@@ -93,10 +84,6 @@ export const AgentRunner = ({
     'transactionHashes',
     'transactionRequestId',
   ]);
-  const environmentVariables = useEnvironmentVariables(
-    currentEntry,
-    Object.keys(queryParams),
-  );
   const utils = api.useUtils();
   const threadId = queryParams.threadId ?? '';
   const showLogs = queryParams.showLogs === 'true';
@@ -109,8 +96,6 @@ export const AgentRunner = ({
 
   const [htmlOutput, setHtmlOutput] = useState('');
   const [openedFileName, setOpenedFileName] = useState<string | null>(null);
-  const [parametersOpenForSmallScreens, setParametersOpenForSmallScreens] =
-    useState(false);
   const [threadsOpenForSmallScreens, setThreadsOpenForSmallScreens] =
     useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -150,8 +135,6 @@ export const AgentRunner = ({
         const input = {
           thread_id: threadId || undefined,
           agent_id: agentId,
-          agent_env_vars: environmentVariables.metadataVariablesByKey,
-          user_env_vars: environmentVariables.urlVariablesByKey,
           ...data,
         };
 
@@ -437,23 +420,6 @@ export const AgentRunner = ({
                       </Tooltip>
                     </BreakpointDisplay>
 
-                    <BreakpointDisplay show="sidebar-small-screen">
-                      <Tooltip
-                        asChild
-                        content="View output files & agent settings"
-                      >
-                        <Button
-                          label={files.length.toString()}
-                          iconLeft={<Folder />}
-                          size="small"
-                          variant="secondary"
-                          fill="ghost"
-                          style={{ paddingInline: '0.5rem' }}
-                          onClick={() => setParametersOpenForSmallScreens(true)}
-                        />
-                      </Tooltip>
-                    </BreakpointDisplay>
-
                     {htmlOutput && (
                       <Tooltip
                         asChild
@@ -506,18 +472,6 @@ export const AgentRunner = ({
                         }
                       />
                     </Tooltip>
-
-                    {env.NEXT_PUBLIC_CONSUMER_MODE && (
-                      <Tooltip asChild content="Inspect agent source">
-                        <Button
-                          label="Agent Source"
-                          icon={<CodeBlock />}
-                          size="small"
-                          fill="ghost"
-                          href={`https://app.near.ai${sourceUrlForEntry(currentEntry)}`}
-                        />
-                      </Tooltip>
-                    )}
                   </Flex>
 
                   <Button
@@ -534,91 +488,6 @@ export const AgentRunner = ({
             </Flex>
           </Sidebar.MainStickyFooter>
         </Sidebar.Main>
-
-        <Sidebar.Sidebar
-          openForSmallScreens={parametersOpenForSmallScreens}
-          setOpenForSmallScreens={setParametersOpenForSmallScreens}
-        >
-          <Flex direction="column" gap="l">
-            <Flex direction="column" gap="m">
-              <Text size="text-xs" weight={600} uppercase>
-                Output
-              </Text>
-
-              {isLoading ? (
-                <PlaceholderStack />
-              ) : (
-                <>
-                  {files.length ? (
-                    <CardList>
-                      {files.map((file) => (
-                        <Card
-                          padding="s"
-                          gap="s"
-                          key={file.id}
-                          background="sand-2"
-                          onClick={() => {
-                            setOpenedFileName(file.filename);
-                          }}
-                        >
-                          <Flex align="center" gap="s">
-                            <Text
-                              size="text-s"
-                              color="sand-12"
-                              weight={500}
-                              clampLines={1}
-                              style={{ marginRight: 'auto' }}
-                            >
-                              {file.filename}
-                            </Text>
-
-                            <Text size="text-xs">
-                              {formatBytes(file.bytes)}
-                            </Text>
-                          </Flex>
-                        </Card>
-                      ))}
-                    </CardList>
-                  ) : (
-                    <Text size="text-s" color="sand-10">
-                      No files generated yet.
-                    </Text>
-                  )}
-                </>
-              )}
-            </Flex>
-
-            {!env.NEXT_PUBLIC_CONSUMER_MODE && (
-              <>
-                <EnvironmentVariables
-                  entry={currentEntry}
-                  excludeQueryParamKeys={Object.keys(queryParams)}
-                />
-
-                <Flex direction="column" gap="m">
-                  <Text size="text-xs" weight={600} uppercase>
-                    Parameters
-                  </Text>
-
-                  <Controller
-                    control={form.control}
-                    name="max_iterations"
-                    render={({ field }) => (
-                      <Slider
-                        label="Max Iterations"
-                        max={20}
-                        min={1}
-                        step={1}
-                        assistive="The maximum number of iterations to run the agent for, usually 1. Each iteration will loop back through your agent allowing it to act and reflect on LLM results."
-                        {...field}
-                      />
-                    )}
-                  />
-                </Flex>
-              </>
-            )}
-          </Flex>
-        </Sidebar.Sidebar>
       </Sidebar.Root>
 
       <AgentPermissionsModal

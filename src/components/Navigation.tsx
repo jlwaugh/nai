@@ -11,7 +11,6 @@ import {
 } from '@near-pagoda/ui';
 import {
   BookOpenText,
-  Gear,
   Moon,
   Sun,
   User,

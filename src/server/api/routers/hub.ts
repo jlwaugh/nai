@@ -5,11 +5,9 @@ import { env } from '~/env';
 import {
   chatWithAgentModel,
   type entriesModel,
-  entryCategory,
   entryModel,
   entrySecretModel,
   filesModel,
-  modelsModel,
   noncesModel,
   optionalVersion,
   revokeNonceModel,
@@ -36,7 +34,7 @@ export const hubRouter = createTRPCRouter({
   entries: publicProcedure
     .input(
       z.object({
-        category: entryCategory.optional(),
+        category: z.literal('agent'),
         limit: z.number().default(10_000),
         namespace: z.string().optional(),
         showLatestVersion: z.boolean().default(true),
@@ -137,15 +135,6 @@ export const hubRouter = createTRPCRouter({
       return paths;
     }),
 
-  models: publicProcedure.query(async () => {
-    const url = `${env.ROUTER_URL}/models`;
-
-    const response = await fetch(url);
-    const data: unknown = await response.json().catch(() => response.text());
-
-    return modelsModel.parse(data);
-  }),
-
   nonces: protectedProcedure.query(async ({ ctx }) => {
     const url = `${env.ROUTER_URL}/nonce/list`;
 
@@ -226,7 +215,7 @@ export const hubRouter = createTRPCRouter({
   addSecret: protectedProcedure
     .input(
       z.object({
-        category: entryCategory,
+        category: z.literal('agent'),
         description: z.string().optional().default(''),
         key: z.string(),
         name: z.string(),
@@ -265,7 +254,7 @@ export const hubRouter = createTRPCRouter({
   removeSecret: protectedProcedure
     .input(
       z.object({
-        category: entryCategory,
+        category: z.literal('agent'),
         key: z.string(),
         name: z.string(),
         namespace: z.string(),
