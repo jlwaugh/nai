@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { type z } from 'zod';
 
-import { useEntryEnvironmentVariables } from '~/hooks/entries';
+import { useEnvironmentVariables } from '~/hooks/entries';
 import {
   ENTRY_CATEGORY_LABELS,
   idForEntry,
@@ -176,14 +176,14 @@ export const AgentPermissionsModal = ({
                   <>
                     <Text>
                       The current agent{' '}
-                      <Text href={`/agents/${agentId}`} target="_blank">
+                      <Text href={`https://app.near.ai/agents/${agentId}`} target="_blank" rel="noopener noreferrer">
                         {agentId}
                       </Text>{' '}
                       wants to send an additional request to a different agent{' '}
-                      <Text href={`/agents/${otherAgentId}`} target="_blank">
+                      <Text href={`https://app.near.ai/agents/${otherAgentId}`} target="_blank" rel="noopener noreferrer">
                         {otherAgentId}
                       </Text>{' '}
-                      using your {`account's`} signature{' '}
+                      using your signature{' '}
                       <Text as="span" color="sand-12" weight={500}>
                         {auth?.account_id}
                       </Text>
@@ -221,7 +221,7 @@ export const AgentPermissionsModal = ({
                   <>
                     <Text>
                       The current agent{' '}
-                      <Text href={`/agents/${agentId}`} target="_blank">
+                      <Text href={`https://app.near.ai/agents/${agentId}`} target="_blank" rel="noopener noreferrer">
                         {agentId}
                       </Text>{' '}
                       wants to request a wallet transaction. If allowed, you
@@ -312,7 +312,7 @@ const SecretsToAdd = ({
 }) => {
   const agentId = idForEntry(agent);
   const [revealedSecretKeys, setRevealedSecretKeys] = useState<string[]>([]);
-  const { variablesByKey } = useEntryEnvironmentVariables(agent);
+  const { variablesByKey } = useEnvironmentVariables(agent);
 
   const toggleRevealSecret = (key: string) => {
     const revealed = revealedSecretKeys.find((k) => k === key);
@@ -352,7 +352,7 @@ const SecretsToAdd = ({
     <>
       <Text>
         The current agent{' '}
-        <Text href={`/agents/${agentId}`} target="_blank">
+        <Text href={`https://app.near.ai/agents/${agentId}`} target="_blank" rel="noopener noreferrer">
           {agentId}
         </Text>{' '}
         wants to save {secrets.length}
@@ -499,8 +499,9 @@ const SecretsToAdd = ({
               <Text
                 size="text-xs"
                 color={secret.isExternalAgent ? 'amber-11' : 'sand-11'}
-                href={`/agents/${secret.normalizedAgentId}`}
+                href={`https://app.near.ai/agents/${secret.normalizedAgentId}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 decoration="none"
                 forceWordBreak
               >

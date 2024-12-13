@@ -36,7 +36,7 @@ import { type z } from 'zod';
 
 import { AgentPermissionsModal } from '~/components/AgentPermissionsModal';
 import { AgentWelcome } from '~/components/AgentWelcome';
-import { EntryEnvironmentVariables } from '~/components/EntryEnvironmentVariables';
+import { EnvironmentVariables } from '~/components/EnvironmentVariables';
 import { IframeWithBlob } from '~/components/lib/IframeWithBlob';
 import { Sidebar } from '~/components/lib/Sidebar';
 import { Messages } from '~/components/Messages';
@@ -44,7 +44,7 @@ import { SignInPrompt } from '~/components/SignInPrompt';
 import { ThreadsSidebar } from '~/components/ThreadsSidebar';
 import { env } from '~/env';
 import { useAgentRequestsWithIframe } from '~/hooks/agent-iframe-requests';
-import { useCurrentEntry, useEntryEnvironmentVariables } from '~/hooks/entries';
+import { useCurrentEntry, useEnvironmentVariables } from '~/hooks/entries';
 import { useQueryParams } from '~/hooks/url';
 import { sourceUrlForEntry } from '~/lib/entries';
 import { type chatWithAgentModel, type threadMessageModel } from '~/lib/models';
@@ -93,7 +93,7 @@ export const AgentRunner = ({
     'transactionHashes',
     'transactionRequestId',
   ]);
-  const entryEnvironmentVariables = useEntryEnvironmentVariables(
+  const environmentVariables = useEnvironmentVariables(
     currentEntry,
     Object.keys(queryParams),
   );
@@ -150,8 +150,8 @@ export const AgentRunner = ({
         const input = {
           thread_id: threadId || undefined,
           agent_id: agentId,
-          agent_env_vars: entryEnvironmentVariables.metadataVariablesByKey,
-          user_env_vars: entryEnvironmentVariables.urlVariablesByKey,
+          agent_env_vars: environmentVariables.metadataVariablesByKey,
+          user_env_vars: environmentVariables.urlVariablesByKey,
           ...data,
         };
 
@@ -590,7 +590,7 @@ export const AgentRunner = ({
 
             {!env.NEXT_PUBLIC_CONSUMER_MODE && (
               <>
-                <EntryEnvironmentVariables
+                <EnvironmentVariables
                   entry={currentEntry}
                   excludeQueryParamKeys={Object.keys(queryParams)}
                 />

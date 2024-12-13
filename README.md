@@ -4,7 +4,7 @@ This is an example app built on the [NEAR AI Hub Demo](https://github.com/nearai
 
 ### Nonce management
 
-Revoke nonce(s): http://localhost:3000/settings
+Revoke nonce(s): http://app.near.ai/settings
 
 ----
 

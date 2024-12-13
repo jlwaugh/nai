@@ -30,7 +30,7 @@ export function primaryUrlForEntry(entry: z.infer<typeof entryModel>) {
 
   switch (entry.category as EntryCategory) {
     case 'agent':
-      url = `/agents/${entry.namespace}/${entry.name}/latest`;
+      url = `https://app.near.ai/agents/${entry.namespace}/${entry.name}/latest`;
       break;
   }
 

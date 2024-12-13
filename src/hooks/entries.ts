@@ -92,14 +92,14 @@ export function useEntriesSearch(
   };
 }
 
-export type EntryEnvironmentVariable = {
+export type EnvironmentVariable = {
   key: string;
   metadataValue?: string;
   urlValue?: string;
   secret?: z.infer<typeof entrySecretModel>;
 };
 
-export function useEntryEnvironmentVariables(
+export function useEnvironmentVariables(
   entry: z.infer<typeof entryModel> | undefined,
   excludeQueryParamKeys?: string[],
 ) {
@@ -121,7 +121,7 @@ export function useEntryEnvironmentVariables(
       urlVariablesByKey[key] = value;
     });
 
-    const variablesByKey: Record<string, EntryEnvironmentVariable> = {};
+    const variablesByKey: Record<string, EnvironmentVariable> = {};
 
     Object.entries(metadataVariablesByKey).forEach(([key, value]) => {
       variablesByKey[key] = {

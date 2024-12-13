@@ -261,8 +261,10 @@ export const ThreadsSidebar = ({
 
               <Button
                 label="Browse Agents"
-                href="/agents"
+                href="https://app.near.ai/agents"
                 size="small"
+                target="_blank"
+                rel="noopener noreferrer"
                 variant="secondary"
               />
             </>

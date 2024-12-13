@@ -26,8 +26,8 @@ import { type SubmitHandler, useForm } from 'react-hook-form';
 import { type z } from 'zod';
 
 import {
-  type EntryEnvironmentVariable,
-  useEntryEnvironmentVariables,
+  type EnvironmentVariable,
+  useEnvironmentVariables,
   useEntryParams,
 } from '~/hooks/entries';
 import { type entryModel } from '~/lib/models';
@@ -44,16 +44,16 @@ type Props = {
   excludeQueryParamKeys?: string[];
 };
 
-export const EntryEnvironmentVariables = ({
+export const EnvironmentVariables = ({
   entry,
   excludeQueryParamKeys,
 }: Props) => {
-  const { variables } = useEntryEnvironmentVariables(
+  const { variables } = useEnvironmentVariables(
     entry,
     excludeQueryParamKeys,
   );
   const [selectedVariable, setSelectedVariable] =
-    useState<EntryEnvironmentVariable | null>(null);
+    useState<EnvironmentVariable | null>(null);
   const [secretModalIsOpen, setSecretModalIsOpen] = useState(false);
   const [revealedSecretKeys, setRevealedSecretKeys] = useState<string[]>([]);
 
@@ -67,7 +67,7 @@ export const EntryEnvironmentVariables = ({
     });
   };
 
-  const descriptionForMetadataValue = (variable: EntryEnvironmentVariable) => {
+  const descriptionForMetadataValue = (variable: EnvironmentVariable) => {
     let description = `Value provided by ${entry.category} metadata (details.env_vars).`;
     if (variable.secret) {
       description += ` This value is currently being overridden by a secret you've configured.`;
@@ -77,7 +77,7 @@ export const EntryEnvironmentVariables = ({
     return description;
   };
 
-  const descriptionForUrlValue = (variable: EntryEnvironmentVariable) => {
+  const descriptionForUrlValue = (variable: EnvironmentVariable) => {
     let description = `Value provided by URL query parameter.`;
     if (variable.secret) {
       description += ` This value is currently being overridden by a secret you've configured.`;
@@ -308,7 +308,7 @@ export const EntryEnvironmentVariables = ({
 
 type SecretFormProps = {
   entry: z.infer<typeof entryModel>;
-  existingVariable: EntryEnvironmentVariable | null;
+  existingVariable: EnvironmentVariable | null;
   onFinish: () => void;
 };
 

@@ -1,6 +1,8 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
+const defaultChatAgentId = 'zavodil.near/pm-agent/latest';
+
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -27,7 +29,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CHAT_AGENT_ID: z
       .string()
       .regex(/.+\/.+\/.+/)
-      .default('zavodil.near/pm-agent/1'),
+      .default(defaultChatAgentId),
     NEXT_PUBLIC_AUTH_URL: z.string().url().optional(),
   },
 

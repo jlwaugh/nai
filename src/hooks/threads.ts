@@ -57,7 +57,7 @@ export function useThreads() {
         rootAgentId.split('/');
       if (!namespace || !name || !version || otherSegments.length > 0) continue;
 
-      const agentUrl = `/agents/${namespace}/${name}/${version}`;
+      const agentUrl = `https://app.near.ai/agents/${namespace}/${name}/${version}`;
       const threadUrl = `${agentUrl}/run?threadId=${encodeURIComponent(data.id)}`;
 
       result.push({
