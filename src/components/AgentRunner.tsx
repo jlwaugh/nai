@@ -36,7 +36,6 @@ import { type z } from 'zod';
 
 import { AgentPermissionsModal } from '~/components/AgentPermissionsModal';
 import { AgentWelcome } from '~/components/AgentWelcome';
-import { EntryEnvironmentVariables } from '~/components/EntryEnvironmentVariables';
 import { IframeWithBlob } from '~/components/lib/IframeWithBlob';
 import { Sidebar } from '~/components/lib/Sidebar';
 import { Messages } from '~/components/Messages';
@@ -44,9 +43,9 @@ import { SignInPrompt } from '~/components/SignInPrompt';
 import { ThreadsSidebar } from '~/components/ThreadsSidebar';
 import { env } from '~/env';
 import { useAgentRequestsWithIframe } from '~/hooks/agent-iframe-requests';
-import { useCurrentEntry, useEntryEnvironmentVariables } from '~/hooks/entries';
+
+import { useAgentParams } from '~/hooks/agents';
 import { useQueryParams } from '~/hooks/url';
-import { sourceUrlForEntry } from '~/lib/entries';
 import { type chatWithAgentModel, type threadMessageModel } from '~/lib/models';
 import { useAuthStore } from '~/stores/auth';
 import { useThreadsStore } from '~/stores/threads';
@@ -79,11 +78,29 @@ export const AgentRunner = ({
   version,
   showLoadingPlaceholder,
 }: Props) => {
-  const { currentEntry, currentEntryId: agentId } = useCurrentEntry('agent', {
+  const { id } = useAgentParams({
     namespace,
     name,
     version,
   });
+
+  const agentsQuery = api.hub.agents.useQuery({
+    namespace,
+    showLatestVersion: false,
+  });
+
+  const currentVersions = agentsQuery.data?.filter(
+    (item) => item.name === name,
+  );
+
+  currentVersions?.sort((a, b) => b.id - a.id);
+
+  const currentAgent =
+    version === 'latest'
+      ? currentVersions?.[0]
+      : currentVersions?.find((item) => item.version === version);
+
+  const agentId = id;
 
   const isAuthenticated = useAuthStore((store) => store.isAuthenticated);
   const { queryParams, updateQueryPath } = useQueryParams([
@@ -93,10 +110,6 @@ export const AgentRunner = ({
     'transactionHashes',
     'transactionRequestId',
   ]);
-  const entryEnvironmentVariables = useEntryEnvironmentVariables(
-    currentEntry,
-    Object.keys(queryParams),
-  );
   const utils = api.useUtils();
   const threadId = queryParams.threadId ?? '';
   const showLogs = queryParams.showLogs === 'true';
@@ -150,8 +163,6 @@ export const AgentRunner = ({
         const input = {
           thread_id: threadId || undefined,
           agent_id: agentId,
-          agent_env_vars: entryEnvironmentVariables.metadataVariablesByKey,
-          user_env_vars: entryEnvironmentVariables.urlVariablesByKey,
           ...data,
         };
 
@@ -217,7 +228,7 @@ export const AgentRunner = ({
     iframeNonce,
     iframePostMessage,
     onIframePostMessage,
-  } = useAgentRequestsWithIframe(currentEntry, chatMutation, threadId);
+  } = useAgentRequestsWithIframe(currentAgent, chatMutation, threadId);
 
   const isRunning =
     chatMutation.isPending ||
@@ -308,10 +319,10 @@ export const AgentRunner = ({
   }, [files, htmlOutput, agentId, setView]);
 
   useEffect(() => {
-    if (currentEntry && isAuthenticated) {
+    if (currentAgent && isAuthenticated) {
       form.setFocus('new_message');
     }
-  }, [threadId, currentEntry, isAuthenticated, form]);
+  }, [threadId, currentAgent, isAuthenticated, form]);
 
   useEffect(() => {
     if (threadId !== chatMutationThreadId.current) {
@@ -326,19 +337,19 @@ export const AgentRunner = ({
   }, [agentId, form]);
 
   useEffect(() => {
-    if (currentEntry && !form.formState.isDirty) {
+    if (currentAgent && !form.formState.isDirty) {
       const maxIterations =
-        currentEntry.details.agent?.defaults?.max_iterations ?? 1;
+        currentAgent.details.agent?.defaults?.max_iterations ?? 1;
       form.setValue('max_iterations', maxIterations);
     }
-  }, [currentEntry, form]);
+  }, [currentAgent, form]);
 
   useEffect(() => {
     setThreadsOpenForSmallScreens(false);
   }, [threadId]);
 
   useEffect(() => {
-    const agentDetails = currentEntry?.details.agent;
+    const agentDetails = currentAgent?.details.agent;
     const initialUserMessage = agentDetails?.initial_user_message;
     const maxIterations = agentDetails?.defaults?.max_iterations ?? 1;
 
@@ -348,9 +359,9 @@ export const AgentRunner = ({
         new_message: initialUserMessage,
       });
     }
-  }, [currentEntry, threadId, chatMutation]);
+  }, [currentAgent, threadId, chatMutation]);
 
-  if (!currentEntry) {
+  if (!currentAgent) {
     if (showLoadingPlaceholder) return <PlaceholderSection />;
     return null;
   }
@@ -392,7 +403,7 @@ export const AgentRunner = ({
                   messages={messages}
                   threadId={threadId}
                   welcomeMessage={
-                    <AgentWelcome details={currentEntry.details} />
+                    <AgentWelcome details={currentAgent.details} />
                   }
                 />
               )}
@@ -514,7 +525,7 @@ export const AgentRunner = ({
                           icon={<CodeBlock />}
                           size="small"
                           fill="ghost"
-                          href={`https://app.near.ai${sourceUrlForEntry(currentEntry)}`}
+                          href={`https://app.near.ai/agents/${currentAgent.namespace}/${currentAgent.name}/source`}
                         />
                       </Tooltip>
                     )}
@@ -590,11 +601,6 @@ export const AgentRunner = ({
 
             {!env.NEXT_PUBLIC_CONSUMER_MODE && (
               <>
-                <EntryEnvironmentVariables
-                  entry={currentEntry}
-                  excludeQueryParamKeys={Object.keys(queryParams)}
-                />
-
                 <Flex direction="column" gap="m">
                   <Text size="text-xs" weight={600} uppercase>
                     Parameters
@@ -622,7 +628,7 @@ export const AgentRunner = ({
       </Sidebar.Root>
 
       <AgentPermissionsModal
-        agent={currentEntry}
+        agent={currentAgent}
         onAllow={(requests) =>
           conditionallyProcessAgentRequests(requests, true)
         }

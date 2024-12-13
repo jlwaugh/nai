@@ -2,8 +2,8 @@ import { type z } from 'zod';
 import { create, type StateCreator } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { idForEntry } from '~/lib/entries';
-import { type entryModel } from '~/lib/models';
+import { idForAgent } from '~/lib/agents';
+import { type agentModel } from '~/lib/models';
 
 type AgentSettings = Partial<{
   allowRemoteRunCallsToOtherAgents: boolean;
@@ -12,9 +12,9 @@ type AgentSettings = Partial<{
 
 type AgentSettingsStore = {
   agentSettingsById: Record<string, AgentSettings>;
-  getAgentSettings: (agent: z.infer<typeof entryModel>) => AgentSettings;
+  getAgentSettings: (agent: z.infer<typeof agentModel>) => AgentSettings;
   setAgentSettings: (
-    agent: z.infer<typeof entryModel>,
+    agent: z.infer<typeof agentModel>,
     settings: AgentSettings,
   ) => void;
 };
@@ -22,20 +22,20 @@ type AgentSettingsStore = {
 const createStore: StateCreator<AgentSettingsStore> = (set, get) => ({
   agentSettingsById: {},
 
-  getAgentSettings: (agent: z.infer<typeof entryModel>) => {
-    const id = idForEntry(agent);
+  getAgentSettings: (agent: z.infer<typeof agentModel>) => {
+    const id = idForAgent(agent);
     return get().agentSettingsById[id] ?? {};
   },
 
   setAgentSettings: (
-    agent: z.infer<typeof entryModel>,
+    agent: z.infer<typeof agentModel>,
     settings: AgentSettings,
   ) => {
     const agentSettingsById = {
       ...get().agentSettingsById,
     };
 
-    const id = idForEntry(agent);
+    const id = idForAgent(agent);
 
     agentSettingsById[id] = {
       ...agentSettingsById[id],

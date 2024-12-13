@@ -19,7 +19,6 @@ import {
   Moon,
   Star,
   Sun,
-  Trophy,
   User,
   X,
 } from '@phosphor-icons/react';
@@ -28,39 +27,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { env } from '~/env';
 import { signInWithNear } from '~/lib/auth';
-import { ENTRY_CATEGORY_LABELS } from '~/lib/entries';
 import { useAuthStore } from '~/stores/auth';
 import { useWalletStore } from '~/stores/wallet';
 
 import s from './Navigation.module.scss';
 
-const agentsNav = {
-  label: 'Agents',
-  path: '/agents',
-  icon: ENTRY_CATEGORY_LABELS.agent.icon,
-};
-
-const hubNavItems = [
-  agentsNav,
-  {
-    label: 'Threads',
-    path: '/chat',
-    icon: <ChatCircleDots />,
-  },
-];
-
-const chatNavItems = [
+const navItems = [
   {
     label: 'Chat',
     path: '/chat',
     icon: <ChatCircleDots />,
   },
-  agentsNav,
 ];
-
-const navItems = env.NEXT_PUBLIC_CONSUMER_MODE ? chatNavItems : hubNavItems;
 
 export const Navigation = () => {
   const auth = useAuthStore((store) => store.auth);

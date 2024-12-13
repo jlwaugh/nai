@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             useRouter,
           }}
         >
-          <TRPCReactProvider>
+          <ReactProvider>
             <NearInitializer />
             <ZustandHydration />
             <Toaster />

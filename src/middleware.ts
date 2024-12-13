@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { env } from '~/env';
-
-const defaultRoute = env.NEXT_PUBLIC_CONSUMER_MODE ? '/chat' : '/agents';
+const defaultRoute = '/chat';
 const agentWithoutVersionRegex = /^\/agents\/[^\/]+\/[^\/]+$/;
 
 function redirectUrlPath(path: string, request: NextRequest) {

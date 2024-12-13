@@ -3,8 +3,6 @@
 import { Flex, Text } from '@near-pagoda/ui';
 import { useEffect, useState } from 'react';
 
-import { env } from '~/env';
-
 import s from './Footer.module.scss';
 
 type Props = {

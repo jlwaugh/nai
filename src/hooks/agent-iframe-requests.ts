@@ -11,18 +11,17 @@ import {
 } from '~/components/AgentPermissionsModal';
 import { type AgentChatMutationInput } from '~/components/AgentRunner';
 import { type IframePostMessageEventHandler } from '~/components/lib/IframeWithBlob';
-import { parseEntryId } from '~/lib/entries';
+import { parseAgentId } from '~/lib/agents';
 import {
   agentAddSecretsRequestModel,
   agentNearAccountRequestModel,
   agentNearSendTransactionsRequestModel,
   agentNearViewRequestModel,
   chatWithAgentModel,
-  type entryModel,
+  type agentModel,
 } from '~/lib/models';
 import { useNearStore } from '~/stores/near';
 import { useWalletStore } from '~/stores/wallet';
-import { api } from '~/trpc/react';
 import { unreachable } from '~/utils/unreachable';
 
 import { useQueryParams } from './url';
@@ -38,7 +37,7 @@ export type AgentActionType =
   | 'refresh_thread_id';
 
 export function useAgentRequestsWithIframe(
-  currentEntry: z.infer<typeof entryModel> | undefined,
+  currentAgent: z.infer<typeof agentModel> | undefined,
   chatMutation: UseMutationResult<
     unknown,
     Error,
@@ -47,7 +46,6 @@ export function useAgentRequestsWithIframe(
   >,
   threadId: string | null | undefined,
 ) {
-  const addSecretMutation = api.hub.addSecret.useMutation();
   const { queryParams, updateQueryPath } = useQueryParams([
     'account_id',
     'threadId',
@@ -64,7 +62,6 @@ export function useAgentRequestsWithIframe(
   const [iframeNonce, setIframeNonce] = useState<number | null>(null);
   const [agentRequestsNeedingPermissions, setAgentRequestsNeedingPermissions] =
     useState<AgentRequestWithPermissions[] | null>(null);
-  const utils = api.useUtils();
 
   const handleWalletTransactionResponse = useCallback(
     (options: {
@@ -102,9 +99,9 @@ export function useAgentRequestsWithIframe(
     requests: AgentRequestWithPermissions[],
     allowedBypass?: boolean,
   ) => {
-    if (!currentEntry) return;
+    if (!currentAgent) return;
 
-    const permissionsCheck = checkAgentPermissions(currentEntry, requests);
+    const permissionsCheck = checkAgentPermissions(currentAgent, requests);
 
     if (allowedBypass ?? permissionsCheck.allowed) {
       requests.forEach(async ({ action, input }) => {
@@ -114,9 +111,8 @@ export function useAgentRequestsWithIframe(
 
           for (const secret of input.secrets) {
             try {
-              const { name, namespace, version } = parseEntryId(secret.agentId);
+              const { name, namespace, version } = parseAgentId(secret.agentId);
               await addSecretMutation.mutateAsync({
-                category: 'agent',
                 key: secret.key,
                 name,
                 namespace,
@@ -141,9 +137,6 @@ export function useAgentRequestsWithIframe(
               failedKeys,
             },
           });
-
-          await utils.hub.secrets.refetch();
-
           if (input.reloadAgentOnSuccess) {
             setIframeNonce(Date.now()); // This will trigger the iframe to reload
           }
@@ -275,7 +268,7 @@ export function useAgentRequestsWithIframe(
   };
 
   useEffect(() => {
-    if (currentEntry && wallet) {
+    if (currentAgent && wallet) {
       try {
         const rawInput = localStorage.getItem(PENDING_TRANSACTION_KEY);
         if (rawInput) {
@@ -295,7 +288,7 @@ export function useAgentRequestsWithIframe(
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentEntry, wallet]);
+  }, [currentAgent, wallet]);
 
   useEffect(() => {
     if (queryParams.transactionHashes) {

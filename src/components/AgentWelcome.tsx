@@ -3,10 +3,10 @@
 import { Container, Flex, Text } from '@near-pagoda/ui';
 import { type z } from 'zod';
 
-import { type entryModel } from '~/lib/models';
+import { type agentModel } from '~/lib/models';
 
 type Props = {
-  details: z.infer<typeof entryModel>['details'];
+  details: z.infer<typeof agentModel>['details'];
 };
 
 export const AgentWelcome = ({ details }: Props) => {

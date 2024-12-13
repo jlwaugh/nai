@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { parseStringOrNumber } from '~/utils/number';
-
 export const authorizationModel = z.object({
   account_id: z.string(),
   public_key: z.string(),
@@ -63,18 +61,12 @@ export const revokeNonceModel = z.object({
   auth: z.string(),
 });
 
-export const entryCategory = z.enum([
-  'agent',
-  'environment',
-]);
-export type EntryCategory = z.infer<typeof entryCategory>;
-
 export const optionalVersion = z.preprocess(
   (value) => (!value || value === 'latest' || value === '*' ? '' : value),
   z.string(),
 );
 
-export const entryDetailsModel = z.intersection(
+export const agentDetailsModel = z.intersection(
   z
     .object({
       agent: z
@@ -109,22 +101,21 @@ export const entryDetailsModel = z.intersection(
   z.record(z.string(), z.unknown()),
 );
 
-export const entryModel = z.object({
+export const agentModel = z.object({
   id: z.number(),
-  category: entryCategory,
   namespace: z.string(),
   name: z.string(),
   version: z.string(),
   updated: z.string().datetime().default(new Date().toISOString()),
   description: z.string().default(''),
   tags: z.string().array().default([]),
-  show_entry: z.boolean().default(true),
+  show_agent: z.boolean().default(true),
   starred_by_point_of_view: z.boolean().default(false),
   num_stars: z.number().default(0),
-  details: entryDetailsModel.default({}),
+  details: agentDetailsModel.default({}),
 });
 
-export const entriesModel = z.array(entryModel);
+export const agentsModel = z.array(agentModel);
 
 export const fileModel = z.object({
   filename: z.string(),
@@ -132,14 +123,13 @@ export const fileModel = z.object({
 
 export const filesModel = fileModel.array();
 
-export const entrySecretModel = z.object({
+export const agentSecretModel = z.object({
   namespace: z.string(),
   name: z.string(),
   version: z.string().optional(),
   description: z.string().nullable().default(''),
   key: z.string(),
   value: z.string(),
-  category: z.string().optional(),
 });
 
 const walletTransactionActionModel = z.discriminatedUnion('type', [
